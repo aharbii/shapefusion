@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -412,6 +412,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -422,16 +423,16 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OTHER_CFLAGS = (
-					"-I/opt/static/lib/wx/include/osx_cocoa-unicode-static-3.1",
-					"-I/opt/static/include/wx-3.1",
+					"-I/Users/$USER/wxWidgets/include",
+					"-I/Users/$USER/wxWidgets/lib/wx/include/osx_cocoa-unicode-static-3.2",
 					"-D_FILE_OFFSET_BITS=64",
 					"-D__WXMAC__",
 					"-D__WXOSX__",
 					"-D__WXOSX_COCOA__",
-					"-I/opt/static/include",
+					"-I/opt/homebrew/include",
 				);
 				OTHER_LDFLAGS = (
-					"-L/opt/static/lib",
+					"-L/Users/$USER/wxWidgets/lib",
 					"-framework",
 					IOKit,
 					"-framework",
@@ -444,27 +445,39 @@
 					System,
 					"-framework",
 					OpenGL,
-					"/opt/static/lib/libwx_osx_cocoau_xrc-3.1.a",
-					"/opt/static/lib/libwx_osx_cocoau_qa-3.1.a",
-					"/opt/static/lib/libwx_baseu_net-3.1.a",
-					"/opt/static/lib/libwx_osx_cocoau_html-3.1.a",
-					"/opt/static/lib/libwx_osx_cocoau_core-3.1.a",
-					"/opt/static/lib/libwx_baseu_xml-3.1.a",
-					"/opt/static/lib/libwx_baseu-3.1.a",
+					"-framework",
+					QuartzCore,
+					"/Users/$USER/wxWidgets/lib/libwx_osx_cocoau_xrc-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_osx_cocoau_qa-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_baseu_net-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_osx_cocoau_html-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_osx_cocoau_core-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_baseu_xml-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_baseu-3.2.a",
 					"-framework",
 					WebKit,
-					"-lwxtiff-3.1",
-					"-lwxjpeg-3.1",
-					"-lwxpng-3.1",
-					"-lwxregexu-3.1",
-					"-lwxscintilla-3.1",
+					"/Users/$USER/wxWidgets/lib/libwxtiff-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwxjpeg-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwxpng-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwxregexu-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwxscintilla-3.2.a",
 					"-lexpat",
 					"-lz",
 					"-framework",
 					Security,
 					"-lpthread",
 					"-liconv",
-					"-lsndfile",
+					/opt/homebrew/lib/libsndfile.a,
+					/opt/homebrew/lib/libFLAC.a,
+					"-L/opt/homebrew/lib",
+					/opt/homebrew/lib/libid3tag.dylib,
+					/opt/homebrew/lib/libmp3lame.a,
+					/opt/homebrew/lib/libmpg123.a,
+					/opt/homebrew/lib/libogg.a,
+					/opt/homebrew/lib/libopus.a,
+					/opt/homebrew/lib/libvorbis.a,
+					/opt/homebrew/lib/libvorbisfile.a,
+					/opt/homebrew/lib/libvorbisenc.a,
 				);
 				WARNING_CFLAGS = "-Wall";
 			};
@@ -491,6 +504,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -502,16 +516,16 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OTHER_CFLAGS = (
-					"-I/opt/static/lib/wx/include/osx_cocoa-unicode-static-3.1",
-					"-I/opt/static/include/wx-3.1",
+					"-I/Users/aharbi/Workset/freelancing/proposals/shapeFusionAssets/wxWidgets-3.2.5/include",
+					"-I/Users/$USER/wxWidgets/lib/wx/include/osx_cocoa-unicode-static-3.2",
 					"-D_FILE_OFFSET_BITS=64",
 					"-D__WXMAC__",
 					"-D__WXOSX__",
 					"-D__WXOSX_COCOA__",
-					"-I/opt/static/include",
+					"-I/opt/homebrew/include",
 				);
 				OTHER_LDFLAGS = (
-					"-L/opt/static/lib",
+					"-L/Users/$USER/wxWidgets/lib",
 					"-framework",
 					IOKit,
 					"-framework",
@@ -524,18 +538,20 @@
 					System,
 					"-framework",
 					OpenGL,
-					"/opt/static/lib/libwx_osx_cocoau_xrc-3.1.a",
-					"/opt/static/lib/libwx_osx_cocoau_qa-3.1.a",
-					"/opt/static/lib/libwx_baseu_net-3.1.a",
-					"/opt/static/lib/libwx_osx_cocoau_html-3.1.a",
-					"/opt/static/lib/libwx_osx_cocoau_core-3.1.a",
-					"/opt/static/lib/libwx_baseu_xml-3.1.a",
-					"/opt/static/lib/libwx_baseu-3.1.a",
+					"-framework",
+					QuartzCore,
+					"/Users/$USER/wxWidgets/lib/libwx_osx_cocoau_xrc-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_osx_cocoau_qa-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_baseu_net-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_osx_cocoau_html-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_osx_cocoau_core-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_baseu_xml-3.2.a",
+					"/Users/$USER/wxWidgets/lib/libwx_baseu-3.2.a",
 					"-framework",
 					WebKit,
-					"-lwxtiff-3.1",
-					"-lwxjpeg-3.1",
-					"-lwxpng-3.1",
+					"-l/Users/$USER/wxWidgets/libwxtiff-3.2",
+					"-l/Users/$USER/wxWidgets/libwxjpeg-3.2",
+					"-l/Users/$USER/wxWidgets/libwxpng-3.2",
 					"-lwxregexu-3.1",
 					"-lwxscintilla-3.1",
 					"-lexpat",
@@ -544,7 +560,17 @@
 					Security,
 					"-lpthread",
 					"-liconv",
-					"-lsndfile",
+					/opt/homebrew/lib/libsndfile.a,
+					/opt/homebrew/lib/libFLAC.a,
+					"-L/opt/homebrew/lib",
+					/opt/homebrew/lib/libid3tag.dylib,
+					/opt/homebrew/lib/libmp3lame.a,
+					/opt/homebrew/lib/libmpg123.a,
+					/opt/homebrew/lib/libogg.a,
+					/opt/homebrew/lib/libopus.a,
+					/opt/homebrew/lib/libvorbis.a,
+					/opt/homebrew/lib/libvorbisfile.a,
+					/opt/homebrew/lib/libvorbisenc.a,
 				);
 			};
 			name = Release;
@@ -554,8 +580,9 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = ShapeFusion.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 0.7;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = 3LL5KX63PG;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_FILE_OFFSET_BITS=64",
@@ -581,9 +608,10 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = ShapeFusion.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 0.7;
 				DEAD_CODE_STRIPPING = YES;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = 3LL5KX63PG;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_FILE_OFFSET_BITS=64",
