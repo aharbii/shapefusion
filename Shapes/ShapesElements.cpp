@@ -313,6 +313,12 @@ bool ShapesBitmap::operator==(const ShapesBitmap& other) const
 	}
 }
 
+void ShapesBitmap::operator=(const ShapesBitmap& other)
+{
+    mColumnOrder = other.mColumnOrder;
+    mTransparent = other.mTransparent;
+}
+
 unsigned int ShapesBitmap::SizeInFile(void) const
 {
 	unsigned int size = 0;
@@ -756,6 +762,21 @@ bool ShapesFrame::operator==(const ShapesFrame& other) const
 		&& mOriginY == other.mOriginY
 		&& mKeyX == other.mKeyX
 		&& mKeyY == other.mKeyY;
+}
+
+void ShapesFrame::operator=(const ShapesFrame& other)
+{
+    mXmirror = other.mXmirror;
+    mYmirror = other.mYmirror;
+    mKeypointObscured = other.mKeypointObscured;
+    mMinimumLightIntensity = other.mMinimumLightIntensity;
+    // TODO: confirm if BitmapIndex shall be copied or not
+    // mBitmapIndex = other.mBitmapIndex;
+    mScaleFactor = other.mScaleFactor;
+    mOriginX = other.mOriginX;
+    mOriginY = other.mOriginY;
+    mKeyX = other.mKeyX;
+    mKeyY = other.mKeyY;;
 }
 
 BigEndianBuffer& ShapesFrame::SaveObject(BigEndianBuffer& buffer)

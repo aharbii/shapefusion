@@ -45,6 +45,8 @@ EVT_MENU(SHAPES_MENU_ADDFRAME, ShapesView::MenuShapesNewFrame)
 EVT_MENU(SHAPES_MENU_ADDSEQUENCE, ShapesView::MenuShapesNewSequence)
 EVT_MENU(SHAPES_MENU_GENERATEPATCH, ShapesView::MenuShapesGeneratePatch)
 EVT_MENU(SHAPES_MENU_IMPORTPATCH, ShapesView::MenuShapesImportPatch)
+EVT_MENU(SHAPES_MENU_COPY_VALUES, ShapesView::MenuShapesCopyValues)
+EVT_MENU(SHAPES_MENU_PASTE_VALUES, ShapesView::MenuShapesPasteValues)
 EVT_TREE_SEL_CHANGED(-1, ShapesView::OnTreeSelect)
 // bitmaps
 EVT_COMMAND(BITMAP_BROWSER, wxEVT_BITMAPBROWSER, ShapesView::OnBitmapSelect)
@@ -988,6 +990,42 @@ void ShapesView::MenuShapesImportPatch(wxCommandEvent&)
 	mainbox->Show(s_outer_sizer, false);
 }
 
+void ShapesView::MenuShapesCopyValues(wxCommandEvent &e)
+{
+    ShapesTreeItemData* selected_item_data = dynamic_cast<ShapesTreeItemData*>(colltree->GetItemData(colltree->GetSelection()));
+    
+    if (selected_item_data != NULL) {
+        switch (selected_item_data->Section()) {
+            case TREESECTION_BITMAPS:
+                bb->OnCopy();
+                break;
+            case TREESECTION_FRAMES:
+                fb->OnCopy();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void ShapesView::MenuShapesPasteValues(wxCommandEvent &e)
+{
+    ShapesTreeItemData* selected_item_data = dynamic_cast<ShapesTreeItemData*>(colltree->GetItemData(colltree->GetSelection()));
+    
+    if (selected_item_data != NULL) {
+        switch (selected_item_data->Section()) {
+            case TREESECTION_BITMAPS:
+                bb->OnPaste();
+                break;
+            case TREESECTION_FRAMES:
+                fb->OnPaste();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 // user selected a tree entry
 void ShapesView::OnTreeSelect(wxTreeEvent &e)
 {
@@ -1060,6 +1098,8 @@ void ShapesView::OnTreeSelect(wxTreeEvent &e)
 					menubar->Enable(SHAPES_MENU_EXPORTMASKS, true);
 					menubar->Enable(SHAPES_MENU_ADDFRAME, true);
 					menubar->Enable(SHAPES_MENU_ADDSEQUENCE, true);
+                    menubar->Enable(SHAPES_MENU_COPY_VALUES, false);
+                    menubar->Enable(SHAPES_MENU_PASTE_VALUES, false);
 					
 					// chunk info panel
 					chunk_version_field->ChangeValue(INT_TO_WXSTRING(((ShapesDocument*)GetDocument())->CollectionVersion(new_coll, new_vers)));
@@ -1114,6 +1154,8 @@ void ShapesView::OnTreeSelect(wxTreeEvent &e)
 					menubar->Enable(SHAPES_MENU_EXPORTMASKS, false);
 					menubar->Enable(SHAPES_MENU_ADDFRAME, false);
 					menubar->Enable(SHAPES_MENU_ADDSEQUENCE, false);
+                    menubar->Enable(SHAPES_MENU_COPY_VALUES, false);
+                    menubar->Enable(SHAPES_MENU_PASTE_VALUES, false);
 				}
 			} else {
 				menubar->Enable(SHAPES_MENU_ADDCOLORTABLE, false);
@@ -1122,6 +1164,8 @@ void ShapesView::OnTreeSelect(wxTreeEvent &e)
 				menubar->Enable(SHAPES_MENU_EXPORTMASKS, false);
 				menubar->Enable(SHAPES_MENU_ADDFRAME, false);
 				menubar->Enable(SHAPES_MENU_ADDSEQUENCE, false);
+                menubar->Enable(SHAPES_MENU_COPY_VALUES, false);
+                menubar->Enable(SHAPES_MENU_PASTE_VALUES, false);
 			}
 			mSelectedColl = new_coll;
 			mSelectedVers = new_vers;
@@ -1247,6 +1291,8 @@ void ShapesView::OnBitmapSelect(wxCommandEvent &e)
 		menubar->Enable(EDIT_MENU_PASTE, false);
 		menubar->Enable(SHAPES_MENU_EXPORTBITMAP, false);
 		menubar->Enable(SHAPES_MENU_EXPORTMASK, false);
+        menubar->Enable(SHAPES_MENU_COPY_VALUES, false);
+        menubar->Enable(SHAPES_MENU_PASTE_VALUES, false);
 	} else {
 		ShapesBitmap	*sel_bitmap = ((ShapesDocument*)GetDocument())->GetBitmap(mSelectedColl, mSelectedVers, selection);
 		
@@ -1273,6 +1319,8 @@ void ShapesView::OnBitmapSelect(wxCommandEvent &e)
 		menubar->Enable(EDIT_MENU_PASTE, true);
 		menubar->Enable(SHAPES_MENU_EXPORTBITMAP, true);
 		menubar->Enable(SHAPES_MENU_EXPORTMASK, true);
+        menubar->Enable(SHAPES_MENU_COPY_VALUES, true);
+        menubar->Enable(SHAPES_MENU_PASTE_VALUES, bb->mCopiedData != nullptr);
 	}
 	b_outer_sizer->Layout();
 }
@@ -1304,6 +1352,8 @@ void ShapesView::DoDeleteColorTable(int which)
 		menubar->Enable(EDIT_MENU_COPY, false);
 		menubar->Enable(EDIT_MENU_DELETE, false);
 		menubar->Enable(EDIT_MENU_PASTE, false);
+        menubar->Enable(SHAPES_MENU_COPY_VALUES, false);
+        menubar->Enable(SHAPES_MENU_PASTE_VALUES, false);
 		ctb->Freeze();
 		ctb->Clear();
 		// delete
@@ -1474,20 +1524,29 @@ void ShapesView::DoPasteChunk(unsigned int coll, unsigned int chunk)
 void ShapesView::ToggleBitmapCheckboxes(wxCommandEvent &e)
 {
 	ShapesBitmap	*sel_bitmap = b_view->GetBitmap();
+    
+    vector<ShapesBitmap*> selectedBitmaps = bb->getSelectedBitmaps();
 	
 	if (sel_bitmap != NULL) {
 		switch (e.GetId()) {
 			case CB_COLUMN_ORDER:
-				sel_bitmap->SetColumnOrdered(e.IsChecked());
-				((ShapesDocument*)GetDocument())->Modify(true);
+                sel_bitmap->SetColumnOrdered(e.IsChecked());
+                ((ShapesDocument*)GetDocument())->Modify(true);
+                for (ShapesBitmap *bitmap: selectedBitmaps) {
+                    bitmap->SetColumnOrdered(e.IsChecked());
+                    ((ShapesDocument*)GetDocument())->Modify(true);
+                }
 				break;
 			case CB_ENABLE_TRANSPARENCY:
-				sel_bitmap->SetTransparent(e.IsChecked());
-				bb->RebuildThumbnail(bb->GetSelection());
-				bb->Refresh();
-				b_view->SetBitmap(sel_bitmap);
-				// FIXME also update the FrameBrowser and all that
-				((ShapesDocument*)GetDocument())->Modify(true);
+                sel_bitmap->SetTransparent(e.IsChecked());
+                ((ShapesDocument*)GetDocument())->Modify(true);
+                for (ShapesBitmap* bitmap: selectedBitmaps) {
+                    bitmap->SetTransparent(e.IsChecked());
+                }
+                bb->RebuildThumbnails();
+                bb->Refresh();
+                b_view->SetBitmap(sel_bitmap);
+                // FIXME also update the FrameBrowser and all that
 				break;
 		}
 	}
@@ -1509,6 +1568,8 @@ void ShapesView::OnCTSelect(wxCommandEvent &e)
 		menubar->Enable(EDIT_MENU_COPY, false);
 		menubar->Enable(EDIT_MENU_DELETE, false);
 		menubar->Enable(EDIT_MENU_PASTE, false);
+        menubar->Enable(SHAPES_MENU_COPY_VALUES, false);
+        menubar->Enable(SHAPES_MENU_PASTE_VALUES, false);
 	} else {
 		// selection
 		ShapesColorTable	*ct = ((ShapesDocument*)GetDocument())->GetColorTable(mSelectedColl, mSelectedVers, selection);
@@ -1529,6 +1590,8 @@ void ShapesView::OnCTSelect(wxCommandEvent &e)
 			menubar->Enable(EDIT_MENU_DELETE, false);
 		menubar->Enable(EDIT_MENU_COPY, false);
 		menubar->Enable(EDIT_MENU_PASTE, false);
+        menubar->Enable(SHAPES_MENU_COPY_VALUES, false);
+        menubar->Enable(SHAPES_MENU_PASTE_VALUES, false);
 	}
 	ct_self_lumin_checkbox->Disable();
 	ct_gradient_button->Disable();
@@ -1668,6 +1731,8 @@ void ShapesView::OnFrameSelect(wxCommandEvent &e)
 		menubar->Enable(EDIT_MENU_COPY, false);
 		menubar->Enable(EDIT_MENU_DELETE, false);
 		menubar->Enable(EDIT_MENU_PASTE, false);
+        menubar->Enable(SHAPES_MENU_COPY_VALUES, false);
+        menubar->Enable(SHAPES_MENU_PASTE_VALUES, false);
 	} else {
 		ShapesFrame	*sel_frame = ((ShapesDocument*)GetDocument())->GetFrame(mSelectedColl, mSelectedVers, selection);
 		ShapesBitmap	*assoc_bitmap = NULL;
@@ -1698,6 +1763,8 @@ void ShapesView::OnFrameSelect(wxCommandEvent &e)
 		menubar->Enable(EDIT_MENU_DELETE, true);
 		menubar->Enable(EDIT_MENU_COPY, false);
 		menubar->Enable(EDIT_MENU_PASTE, false);
+        menubar->Enable(SHAPES_MENU_COPY_VALUES, true);
+        menubar->Enable(SHAPES_MENU_PASTE_VALUES, fb->mCopiedData != nullptr);
 	}
 	f_outer_sizer->Layout();
 }
@@ -1743,19 +1810,34 @@ void ShapesView::BitmapIndexSpin(wxSpinEvent &e)
 void ShapesView::ToggleFrameCheckboxes(wxCommandEvent &e)
 {
 	ShapesFrame	*sel_frame = f_view->GetFrame();
+    
+    vector<ShapesFrame*> selectedFrames = fb->getSelectedFrames();
 	
 	if (sel_frame != NULL) {
 		switch (e.GetId()) {
-			case CB_XMIRROR:	sel_frame->SetXmirrored(e.IsChecked());			break;
-			case CB_YMIRROR:	sel_frame->SetYmirrored(e.IsChecked());			break;
-			case CB_KEYPOINT:	sel_frame->SetKeypointObscured(e.IsChecked());	break;
+			case CB_XMIRROR:	
+                sel_frame->SetXmirrored(e.IsChecked());
+                for (ShapesFrame* frame: selectedFrames) {
+                    frame->SetXmirrored(e.IsChecked());
+                }
+                break;
+			case CB_YMIRROR:	
+                sel_frame->SetYmirrored(e.IsChecked());
+                for (ShapesFrame* frame: selectedFrames) {
+                    frame->SetYmirrored(e.IsChecked());
+                }
+                break;
+			case CB_KEYPOINT:	
+                sel_frame->SetKeypointObscured(e.IsChecked());
+                for (ShapesFrame* frame: selectedFrames) {
+                    frame->SetKeypointObscured(e.IsChecked());
+                }
+                break;
 		}
 		// update display
-		if (e.GetId() != CB_KEYPOINT) {
-			fb->RebuildThumbnail(fb->GetSelection());
-			fb->Refresh();
-			f_view->SetFrame(sel_frame);
-		}
+        fb->RebuildThumbnails();
+        fb->Refresh();
+        f_view->SetFrame(sel_frame);
 		((ShapesDocument*)GetDocument())->Modify(true);
 	}
 }
@@ -1765,6 +1847,8 @@ void ShapesView::EditFrameFields(wxCommandEvent &e)
 {
 	ShapesFrame	*sel_frame = f_view->GetFrame();
 	wxString	s = e.GetString();
+    
+    vector<ShapesFrame*> selectedFrames = fb->getSelectedFrames();
 	
 	if (sel_frame != NULL) {
 		long	v = 0;
@@ -1775,22 +1859,32 @@ void ShapesView::EditFrameFields(wxCommandEvent &e)
 			switch (e.GetId()) {
 				case FIELD_ORIGIN_X:
 					sel_frame->SetOriginX(v);
+                    for (ShapesFrame* frame: selectedFrames)
+                        frame->SetOriginX(v);
 					recalculate_world_fields = true;
 					break;
 				case FIELD_ORIGIN_Y:
 					sel_frame->SetOriginY(v);
+                    for (ShapesFrame* frame: selectedFrames)
+                        frame->SetOriginY(v);
 					recalculate_world_fields = true;
 					break;
 				case FIELD_KEY_X:
 					sel_frame->SetKeyX(v);
+                    for (ShapesFrame* frame: selectedFrames)
+                        frame->SetKeyX(v);
 					recalculate_world_fields = true;
 					break;
 				case FIELD_KEY_Y:
 					sel_frame->SetKeyY(v);
+                    for (ShapesFrame* frame: selectedFrames)
+                        frame->SetKeyY(v);
 					recalculate_world_fields = true;
 					break;
 				case FIELD_FRAME_SCALEFACTOR:
 					sel_frame->SetScaleFactor(v);
+                    for (ShapesFrame* frame: selectedFrames)
+                        frame->SetScaleFactor(v);
 					recalculate_world_fields = true;
 					break;
 				case FIELD_MIN_LIGHT_INT:
@@ -1804,6 +1898,8 @@ void ShapesView::EditFrameFields(wxCommandEvent &e)
 						v = 0;
 					}
 					sel_frame->SetMinimumLightIntensity(v / 100.0);
+                    for (ShapesFrame* frame: selectedFrames)
+                        frame->SetMinimumLightIntensity(v / 100.0);
 					break;
 			}
 			// recalculate world_* fields if needed and possible
@@ -1821,6 +1917,21 @@ void ShapesView::EditFrameFields(wxCommandEvent &e)
 				sel_frame->SetWorldX0(scale_factor * (sel_frame->KeyX() - sel_frame->OriginX()));
 				sel_frame->SetWorldY0(-scale_factor * (sel_frame->KeyY() - sel_frame->OriginY()));
 			}
+            if (recalculate_world_fields) {
+                for (ShapesFrame* frame: selectedFrames) {
+                    ShapesBitmap    *assoc_bitmap = ((ShapesDocument*)GetDocument())->GetBitmap(mSelectedColl, mSelectedVers, frame->BitmapIndex());
+                    int            w = assoc_bitmap->Width(),
+                    h = assoc_bitmap->Height(),
+                    scale_factor = frame->ScaleFactor();
+                    
+                    frame->SetWorldLeft(-scale_factor * frame->OriginX());
+                    frame->SetWorldTop(scale_factor * frame->OriginY());
+                    frame->SetWorldRight(scale_factor * (w - frame->OriginX()));
+                    frame->SetWorldBottom(-scale_factor * (h - frame->OriginY()));
+                    frame->SetWorldX0(scale_factor * (frame->KeyX() - frame->OriginX()));
+                    frame->SetWorldY0(-scale_factor * (frame->KeyY() - frame->OriginY()));
+                }
+            }
 			f_view->Refresh();
 			((ShapesDocument*)GetDocument())->Modify(true);
 		}

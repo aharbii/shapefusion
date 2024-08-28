@@ -137,6 +137,7 @@ public:
 	// operators
 	bool operator==(const ShapesBitmap& other) const;
 	bool operator!=(const ShapesBitmap& other) const { return !(*this == other); }
+    void operator=(const ShapesBitmap& other);
 
 	// accessors
 	short Width(void) const { return mWidth; }
@@ -205,6 +206,7 @@ public:
 	// operators
 	bool operator==(const ShapesFrame& other) const;
 	bool operator!=(const ShapesFrame& other) const { return !(*this == other); }
+    void operator=(const ShapesFrame& other);
 	// accessors
 	bool IsXmirrored(void) const {return mXmirror;}
 	bool IsYmirrored(void) const {return mYmirror;}

@@ -35,6 +35,11 @@
 DECLARE_EVENT_TYPE(wxEVT_BITMAPBROWSER, -1)
 DECLARE_EVENT_TYPE(wxEVT_BITMAPBROWSER_DELETE, -1)
 
+enum {
+    SHAPE_BITMAP_COPY = 999,
+    SHAPE_BITMAP_PASTE
+};
+
 class BitmapBrowser: public wxScrolledWindow {
 private:
 	vector<ShapesBitmap*>	mBitmaps;			// pointers to the encoded bitmaps
@@ -48,12 +53,14 @@ private:
 	int						mSelection,			// selected thumbnail
 							mNumCols,
 							mNumRows;
+    vector<int>             mSelectionList;
 	wxPen					mThumbnailPen,
 							mSelectionPen;
 	unsigned int			mFrozenCount;
 
 	wxBitmap CreateThumbnail(ShapesBitmap *bp);
 	void UpdateVirtualSize(void);
+    bool UpdateSelectionOnMouseClick(wxPoint& mouse, bool controlDown);
 
 protected:
 	DECLARE_EVENT_TABLE();
@@ -65,6 +72,11 @@ public:
 	void OnSize(wxSizeEvent& e);
 	void OnMouseDown(wxMouseEvent& e);
 	void OnKeyDown(wxKeyEvent& e);
+    void OnCopy(wxCommandEvent& e);
+    void OnPaste(wxCommandEvent& e);
+    
+    void OnCopy();
+    void OnPaste();
 	// wx things
 	void Freeze(void);
 	void Thaw(void);
@@ -78,6 +90,8 @@ public:
 	// utilities
 	void RebuildThumbnail(unsigned int i);
 	void RebuildThumbnails(void);
+    ShapesBitmap            *mCopiedData;       // data copied to clipboard
+    vector<ShapesBitmap*>   getSelectedBitmaps(void);
 };
 
 #endif

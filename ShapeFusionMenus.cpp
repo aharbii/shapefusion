@@ -155,6 +155,9 @@ void CreateShapesMenu(wxMenuBar *menu_bar)
 	shapes_menu->AppendSeparator();
 	shapes_menu->Append(SHAPES_MENU_IMPORTPATCH, wxT("Apply Shapes Patch..."));
 	shapes_menu->Append(SHAPES_MENU_GENERATEPATCH, wxT("Export Shapes Patch..."));
+    shapes_menu->AppendSeparator();
+    shapes_menu->Append(SHAPES_MENU_COPY_VALUES, wxT("Copy Shape Values\tCtrl-Alt-C"));
+    shapes_menu->Append(SHAPES_MENU_PASTE_VALUES, wxT("Paste Shape Values\tCtrl-Alt-V"));
 	
 	// Let's disable all these items...
 	shapes_menu->Enable(SHAPES_MENU_ADDCOLORTABLE, false);
@@ -167,6 +170,8 @@ void CreateShapesMenu(wxMenuBar *menu_bar)
 	shapes_menu->Enable(SHAPES_MENU_EXPORTMASKS, false);
 	shapes_menu->Enable(SHAPES_MENU_ADDFRAME, false);
 	shapes_menu->Enable(SHAPES_MENU_ADDSEQUENCE, false);
+    shapes_menu->Enable(SHAPES_MENU_COPY_VALUES, false);
+    shapes_menu->Enable(SHAPES_MENU_PASTE_VALUES, false);
 	
 	// .. and add the whole to the menuBar
 	menu_bar->Append(shapes_menu, wxT("&Shapes"));

@@ -35,6 +35,11 @@
 DECLARE_EVENT_TYPE(wxEVT_FRAMEBROWSER, -1)
 DECLARE_EVENT_TYPE(wxEVT_FRAMEBROWSER_DELETE, -1)
 
+enum {
+    SHAPE_FRAME_COPY = 999,
+    SHAPE_FRAME_PASTE
+};
+
 class FrameBrowser: public wxScrolledWindow {
 private:
 	vector<ShapesFrame*>	mFrames;			// pointers to frames
@@ -49,12 +54,14 @@ private:
 	int						mSelection,
 							mNumCols,
 							mNumRows;
+    vector<int>             mSelectionList;
 	wxPen					mThumbnailPen,
 							mSelectionPen;
 	unsigned int			mFrozenCount;
 
 	wxBitmap CreateThumbnail(ShapesFrame *fp);
 	void UpdateVirtualSize(void);
+	bool UpdateSelectionOnMouseClick(wxPoint& mouse, bool controlDown);
 
 protected:
 	DECLARE_EVENT_TABLE();
@@ -66,6 +73,11 @@ public:
 	void OnSize(wxSizeEvent& e);
 	void OnMouseDown(wxMouseEvent& e);
 	void OnKeyDown(wxKeyEvent& e);
+	void OnCopy(wxCommandEvent& e);
+	void OnPaste(wxCommandEvent& e);
+    
+    void OnCopy();
+    void OnPaste();
 	// wx things
 	void Freeze(void);
 	void Thaw(void);
@@ -81,6 +93,8 @@ public:
 	// utilities
 	void RebuildThumbnail(unsigned int i);
 	void RebuildThumbnails(void);
+    ShapesFrame             *mCopiedData;        // data copied to clipboard
+    vector<ShapesFrame*> getSelectedFrames(void);
 };
 
 #endif

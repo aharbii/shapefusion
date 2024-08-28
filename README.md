@@ -26,3 +26,18 @@ cp -r ../include ~/wxWidgets/include
 ```
 7. open ShapeFusion.xcodeproj
 8. build and run the project
+
+# id3tag library
+1. Run the following commands
+```bash
+wget https://downloads.sourceforge.net/project/mad/libid3tag/0.15.1b/libid3tag-0.15.1b.tar.gz
+tar -xzvf libid3tag-0.15.1b.tar.gz
+cd libid3tag-0.15.1b/
+wget -O config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
+wget -O config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
+mkdir build
+cd build
+../configure --enable-debug --disable-shared
+mkdir ~/id3tag
+cp -r . ~/id3tag
+```

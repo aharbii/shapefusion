@@ -34,7 +34,9 @@ BEGIN_EVENT_TABLE(FrameBrowser, wxScrolledWindow)
 	EVT_SIZE(FrameBrowser::OnSize)
 	EVT_LEFT_DOWN(FrameBrowser::OnMouseDown)
 	EVT_RIGHT_DOWN(FrameBrowser::OnMouseDown)
-	EVT_KEY_DOWN(FrameBrowser::OnKeyDown)
+    EVT_KEY_DOWN(FrameBrowser::OnKeyDown)
+    EVT_MENU(SHAPE_FRAME_COPY, FrameBrowser::OnCopy)
+    EVT_MENU(SHAPE_FRAME_PASTE, FrameBrowser::OnPaste)
 END_EVENT_TABLE()
 
 FrameBrowser::FrameBrowser(wxWindow *parent, wxWindowID id):
@@ -51,6 +53,8 @@ FrameBrowser::FrameBrowser(wxWindow *parent, wxWindowID id):
 	mMargin = 7;
 	mWhiteTransparency = true;
 	mSelection = -1;
+    
+    mCopiedData = nullptr;
 }
 
 void FrameBrowser::OnPaint(wxPaintEvent& e)
@@ -64,7 +68,7 @@ void FrameBrowser::OnPaint(wxPaintEvent& e)
 	// draw thumbnails
 	tempdc.SetPen(mThumbnailPen);
 	tempdc.SetBrush(*wxTRANSPARENT_BRUSH);
-	for (unsigned int i = 0; i < mThumbnails.size(); i++) {
+	for (int i = 0; i < mThumbnails.size(); i++) {
 		int	x = mThumbnailPositions[i].x,
 			y = mThumbnailPositions[i].y;
 
@@ -75,8 +79,8 @@ void FrameBrowser::OnPaint(wxPaintEvent& e)
 
 		int	bw = mThumbnails[i].GetWidth(),
 			bh = mThumbnails[i].GetHeight();
-
-		if ((int)i == mSelection) {
+        bool selected = std::find(mSelectionList.begin(), mSelectionList.end(), i) != mSelectionList.end();
+        if ((int)i == mSelection || selected) {
 			tempdc.DrawBitmap(mThumbnails[i], x + mThumbnailSize/2 - bw/2, y + mThumbnailSize/2 - bh/2);
 			tempdc.SetPen(mSelectionPen);
 			tempdc.DrawRectangle(x-2, y-2, mThumbnailSize+4, mThumbnailSize+4);
@@ -92,44 +96,29 @@ void FrameBrowser::OnPaint(wxPaintEvent& e)
 void FrameBrowser::OnSize(wxSizeEvent& e)
 {
 	UpdateVirtualSize();
+    RebuildThumbnails();
 }
 
 void FrameBrowser::OnMouseDown(wxMouseEvent& e)
 {
 	wxClientDC	dc(this);
 	wxPoint		mouse;
-
 	DoPrepareDC(dc);
 	mouse = e.GetLogicalPosition(dc);
 	switch (e.GetButton()) {
 		case wxMOUSE_BTN_LEFT:
-			// handle frame selection
-			{
-				int	new_selection = -1;
-
-				for (unsigned int i = 0; i < mThumbnailPositions.size(); i++) {
-					wxRect	test(mThumbnailPositions[i].x, mThumbnailPositions[i].y,
-									mThumbnailSize, mThumbnailSize);
-
-					if (test.Contains(mouse)) {
-						new_selection = i;
-						break;
-					}
-				}
-				if (new_selection != mSelection) {
-					mSelection = new_selection;
-					Refresh();
-
-					// send selection event
-					wxCommandEvent	event(wxEVT_FRAMEBROWSER, GetId());
-
-					event.SetEventObject(this);
-					event.SetInt(mSelection);
-					GetEventHandler()->ProcessEvent(event);
-				}
-			}
+            UpdateSelectionOnMouseClick(mouse, e.m_controlDown);
 			break;
 		case wxMOUSE_BTN_RIGHT:
+            if (UpdateSelectionOnMouseClick(mouse, mSelectionList.size() > 1))
+            {
+                wxMenu    menu;
+                menu.Append(SHAPE_FRAME_COPY, wxT("Copy Frame Values"));
+				menu.Append(SHAPE_FRAME_PASTE, wxT("Paste Frame Values"));
+                
+                menu.Enable(SHAPE_FRAME_PASTE, mCopiedData != nullptr);
+                PopupMenu(&menu);
+            }
 			break;
 	}
 	e.Skip();
@@ -192,10 +181,123 @@ void FrameBrowser::OnKeyDown(wxKeyEvent &e)
 				GetEventHandler()->ProcessEvent(event);
 			}
 			break;
+        case 'c':
+            if (e.m_controlDown)
+                OnCopy();
+            break;
+        case 'v':
+            if (e.m_controlDown)
+                OnPaste();
+            break;
 		default:
 			e.Skip();
 			break;
 	}
+}
+
+bool FrameBrowser::UpdateSelectionOnMouseClick(wxPoint& mouse, bool controlDown)
+{
+	// handle frame selection
+	int	new_selection = -1;
+
+	for (unsigned int i = 0; i < mThumbnailPositions.size(); i++) {
+		wxRect	test(mThumbnailPositions[i].x, mThumbnailPositions[i].y,
+						mThumbnailSize, mThumbnailSize);
+
+		if (test.Contains(mouse)) {
+			new_selection = i;
+			break;
+		}
+	}
+	if (!controlDown && new_selection != mSelection) {
+		mSelection = new_selection;
+        RebuildThumbnails();
+		Refresh();
+
+		// send selection event
+		wxCommandEvent	event(wxEVT_FRAMEBROWSER, GetId());
+
+		event.SetEventObject(this);
+		event.SetInt(mSelection);
+		GetEventHandler()->ProcessEvent(event);
+        
+        mSelectionList.clear();
+        if (find(mSelectionList.begin(), mSelectionList.end(), mSelection) == mSelectionList.end()) {
+            mSelectionList.push_back(mSelection);
+        }
+	}
+    else if (controlDown && new_selection != -1) {
+        auto iterator = find(mSelectionList.begin(), mSelectionList.end(), new_selection);
+        if (iterator == mSelectionList.end()) {
+            mSelectionList.push_back(new_selection);
+        } else {
+            mSelectionList.erase(iterator);
+        }
+    }
+    
+    if (!controlDown) {
+        mSelectionList.clear();
+        if (find(mSelectionList.begin(), mSelectionList.end(), mSelection) == mSelectionList.end()) {
+            mSelectionList.push_back(mSelection);
+        }
+    }
+    
+    Refresh();
+    
+    return new_selection != -1;
+}
+
+void FrameBrowser::OnCopy(wxCommandEvent& e)
+{
+    OnCopy();
+}
+
+void FrameBrowser::OnCopy(void)
+{
+    mCopiedData = mFrames[mSelection];
+}
+
+void FrameBrowser::OnPaste(wxCommandEvent& e)
+{
+    OnPaste();
+}
+
+void FrameBrowser::OnPaste(void)
+{
+    if (mCopiedData != nullptr) {
+        if (mSelectionList.size() <= 1) {
+            
+            ShapesFrame    *selectedFrame = mFrames[mSelection];
+            
+            if (selectedFrame != nullptr) {
+                *selectedFrame = *mCopiedData;
+                RebuildThumbnails();
+                Refresh();
+                
+                // send selection event
+                wxCommandEvent    event(wxEVT_FRAMEBROWSER, GetId());
+                
+                event.SetEventObject(this);
+                event.SetInt(mSelection);
+                GetEventHandler()->ProcessEvent(event);
+            }
+        } else {
+            for (int selection: mSelectionList) {
+                ShapesFrame *selectedFrame = mFrames[selection];
+                
+                if (selectedFrame != nullptr) {
+                    *selectedFrame = *mCopiedData;
+                }
+            }
+            
+            RebuildThumbnails();
+            Refresh();
+            wxCommandEvent event(wxEVT_FRAMEBROWSER, GetId());
+            event.SetEventObject(this);
+            event.SetInt(mSelection);
+            GetEventHandler()->ProcessEvent(event);
+        }
+    }
 }
 
 // the Freeze()/Thaw() combo is necessary to get a reasonably
@@ -281,6 +383,7 @@ void FrameBrowser::Clear(void)
 	mBitmaps.clear();
 	mThumbnailPositions.clear();
 	mSelection = -1;
+    mCopiedData = nullptr;
 	if (mFrozenCount == 0) {
 		UpdateVirtualSize();
 		Refresh();
@@ -426,3 +529,11 @@ void FrameBrowser::RebuildThumbnails(void)
 		mThumbnails[i] = CreateThumbnail(mFrames[i]);
 }
 
+vector<ShapesFrame*> FrameBrowser::getSelectedFrames(void)
+{
+    vector<ShapesFrame*> selectedFrames;
+    for (int selection: mSelectionList) {
+        selectedFrames.push_back(mFrames[selection]);
+    }
+    return selectedFrames;
+}

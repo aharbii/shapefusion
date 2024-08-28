@@ -233,6 +233,8 @@ public:
 	void MenuShapesNewSequence(wxCommandEvent &e);
 	void MenuShapesGeneratePatch(wxCommandEvent& e);
 	void MenuShapesImportPatch(wxCommandEvent& e);
+    void MenuShapesCopyValues(wxCommandEvent& e);
+    void MenuShapesPasteValues(wxCommandEvent& e);
 	// control callbacks
 	void OnTreeSelect(wxTreeEvent &e);
 	void OnBitmapSelect(wxCommandEvent &e);
